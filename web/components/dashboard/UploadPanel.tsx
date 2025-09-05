@@ -1,7 +1,7 @@
 // components/UploadPanel.tsx
 "use client";
 
-import { FileVideo, AlertCircle } from "lucide-react";
+import { FileVideo, AlertCircle, X } from "lucide-react";
 import UploadDropzone from "./UploadDropzone";
 import { useUpload } from "@/hooks/useUpload";
 
@@ -22,13 +22,24 @@ interface UploadPanelProps {
 }
 
 export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
-  const { file, error, progress, uploading, onDrop, handleUpload } = useUpload(onClose);
+  // updated hook now manages multiple files
+  const {
+    files,
+    error,
+    progress,
+    uploading,
+    onDrop,
+    handleUpload,
+    removeFile,
+  } = useUpload(onClose);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-full max-w-lg rounded-3xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-center">Upload Video</DialogTitle>
+          <DialogTitle className="text-2xl text-center">
+            Upload Video
+          </DialogTitle>
         </DialogHeader>
 
         {/* Close Button */}
@@ -49,14 +60,36 @@ export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
           </Alert>
         )}
 
-        {/* File Preview */}
-        {file && !error && (
-          <div className="mt-6 flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111]">
-            <FileVideo className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
-            </div>
+        {/* Files Preview */}
+        {files.length > 0 && !error && (
+          <div className="mt-6 space-y-3">
+            {files.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111]"
+              >
+                {/* Left side: icon + details */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <FileVideo className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {file.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right side: remove button */}
+                <button
+                  onClick={() => removeFile(index)}
+                  className="rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                >
+                  <X className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -72,7 +105,7 @@ export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
           </Button>
           <Button
             onClick={handleUpload}
-            disabled={!file || !!error || uploading}
+            disabled={files.length === 0 || !!error || uploading}
           >
             {uploading ? `Uploading ${progress}%` : "Upload"}
           </Button>

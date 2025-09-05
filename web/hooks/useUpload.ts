@@ -1,4 +1,3 @@
-// hooks/useUpload.ts
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
@@ -19,7 +18,7 @@ interface VideoMetadata {
 }
 
 export function useUpload(onClose: () => void) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [uploading, setUploading] = useState(false);
@@ -27,56 +26,64 @@ export function useUpload(onClose: () => void) {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (!acceptedFiles.length) return;
-    const selectedFile = acceptedFiles[0];
 
-    if (selectedFile.size > MAX_SIZE) {
+    const validFiles = acceptedFiles.filter((f) => f.size <= MAX_SIZE);
+    const oversized = acceptedFiles.find((f) => f.size > MAX_SIZE);
+
+    if (oversized) {
       setError("File size cannot exceed 500 MB");
-      setFile(null);
     } else {
-      setFile(selectedFile);
       setError(null);
     }
+
+    setFiles((prev) => [...prev, ...validFiles]);
   }, []);
 
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleUpload = useCallback(async () => {
-    if (!file || !user) return;
+    if (files.length === 0 || !user) return;
     setUploading(true);
     setProgress(0);
 
     try {
-      // 1️⃣ Request signed upload URL
-      const { data: uploadData } = await axios.post<UploadUrlResponse>("/api/upload-url", {
-        fileName: file.name,
-        fileType: file.type,
-        userId: user.id,
-      });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      if (uploadData.error || !uploadData.uploadUrl) {
-        throw new Error(uploadData.error || "Failed to get upload URL");
+        const { data: uploadData } = await axios.post<UploadUrlResponse>("/api/upload-url", {
+          fileName: file.name,
+          fileType: file.type,
+          userId: user.id,
+        });
+
+        if (uploadData.error || !uploadData.uploadUrl) {
+          throw new Error(uploadData.error || "Failed to get upload URL");
+        }
+
+        await axios.put(uploadData.uploadUrl, file, {
+          headers: { "Content-Type": file.type },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const currentFileProgress = (progressEvent.loaded / progressEvent.total) * 100;
+              const overallProgress = Math.round(((i + currentFileProgress / 100) / files.length) * 100);
+              setProgress(overallProgress);
+            }
+          },
+        });
+
+        const videoMetadata: VideoMetadata = {
+          userId: user.id,
+          fileName: file.name,
+          storagePath: uploadData.storagePath,
+          fileSize: file.size,
+        };
+
+        await axios.post("/api/videos", videoMetadata);
       }
 
-      // 2️⃣ Upload file to Supabase
-      await axios.put(uploadData.uploadUrl, file, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-          }
-        },
-      });
-
-      // 3️⃣ Save metadata
-      const videoMetadata: VideoMetadata = {
-        userId: user.id,
-        fileName: file.name,
-        storagePath: uploadData.storagePath,
-        fileSize: file.size,
-      };
-
-      await axios.post("/api/videos", videoMetadata);
-
-      // Reset state + close modal
-      setFile(null);
+      setFiles([]);
       setProgress(0);
       onClose();
     } catch (err) {
@@ -85,7 +92,7 @@ export function useUpload(onClose: () => void) {
     } finally {
       setUploading(false);
     }
-  }, [file, user, onClose]);
+  }, [files, user, onClose]);
 
-  return { file, error, progress, uploading, onDrop, handleUpload };
+  return { files, error, progress, uploading, onDrop, handleUpload, removeFile };
 }

@@ -24,10 +24,10 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/explore" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
+            <Link href="/dashboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
               <Compass className="h-5 w-5 group-hover:rotate-12 transition-transform" />
               <span className="relative after:block after:h-[2px] after:w-0 after:bg-indigo-600 dark:after:bg-indigo-400 after:transition-all group-hover:after:w-full">
-                Explore
+                Dashboard
               </span>
             </Link>
 
@@ -83,7 +83,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-6 pb-4 space-y-4 bg-white/95 dark:bg-[#0D0D0D]/95 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 shadow-lg rounded-b-2xl">
-          <Link href="/explore" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <Link href="/dahsboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
             <Compass className="h-5 w-5" /> Explore
           </Link>
           <Link href="/upload" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">

@@ -9,7 +9,16 @@ const supabase = createClient(
 interface Thumbnail {
   storage_path: string;
 }
-
+interface ShareLink {
+  id: string;
+  video_id: string;
+  visibility: string;
+  emails: string[]; // stored as jsonb
+  token: string;
+  expiry: string;
+  last_viewed_at: string | null;
+  storage_path: string | null;
+}
 export interface Video {
   id: string;//
   user_id: string;//
@@ -19,6 +28,7 @@ export interface Video {
   status: "UPLOADING" | "PROCESSING" | "READY";//
   created_at: string;//
   updated_at: string;//
+  share_links: ShareLink[];
   thumbnails: string[];//
   videoUrl?: string;
   thumbnailsUrls?: string[];
@@ -55,7 +65,6 @@ export async function getUserVideos(userId: string): Promise<Video[]> {
   }
 
   if (!videos) return [];
-  console.log('videos',videos)
   // Map each video to include signed URLs
   const videosWithUrls: Video[] = await Promise.all(
   videos.map(async (video) => {
@@ -81,22 +90,23 @@ export async function getUserVideos(userId: string): Promise<Video[]> {
 export async function getVideoById(videoId: string) {
   const { data: video, error } = await supabase
     .from("videos")
-    .select(`*, thumbnails(storage_path)`)
+    .select(`
+      *,
+      thumbnails (storage_path),
+      share_links (*)
+    `)
     .eq("id", videoId)
     .single();
 
   if (error || !video) return null;
-
+      console.log('video by id',video)
+  // Signed URL for video
   const videoUrl = await fetchSignedUrl("videos", video.storage_path);
 
-  const thumbnails = await Promise.all(
-    (video.thumbnails || []).map((t: any) => fetchSignedUrl("thumbnails", t.storage_path))
+  // Signed URLs for thumbnails
+  const thumbnailsUrls = await Promise.all(
+    (video.thumbnails || []).map((t: Thumbnail) => fetchSignedUrl("thumbnails", t.storage_path))
   );
 
-  // Example: fetch share links if you have a table
-  const { data: links } = await supabase
-    .from("video_links")
-    .select("*")
-    .eq("video_id", videoId);
-  return { ...video, videoUrl, thumbnails, links: links || [] };
+  return { ...video, videoUrl, thumbnailsUrls };
 }
