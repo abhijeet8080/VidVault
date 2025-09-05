@@ -1,19 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import UploadPanel from "@/components/dashboard/UploadPanel"
-import VideoTable from "@/components/dashboard/VideoTable"
-import { useUser } from "@clerk/nextjs"
-import { useVideos, Video } from "@/hooks/useVideos"
+import { useState } from "react";
+import UploadPanel from "@/components/dashboard/UploadPanel";
+import VideoTable from "@/components/dashboard/VideoTable";
+import { useUser } from "@clerk/nextjs";
+import { useVideos, Video } from "@/hooks/useVideos";
 
 export default function DashboardPage() {
-  const { user } = useUser()
-  const { videos, loading } = useVideos(user?.id)
-  const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const { user } = useUser();
+  const { videos, loading } = useVideos(user?.id);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  if (loading) {
-    return <p className="text-gray-500">Loading videos...</p>
-  }
+  // Map videos to the format expected by VideoTable
+  const mappedVideos = videos.map((v: Video) => ({
+    id: v.id,
+    title: v.file_name,
+    progress:
+      v.status === "READY"
+        ? 100
+        : v.status === "PROCESSING"
+        ? 50
+        : 0,
+    thumbnail: v.thumbnailsUrls && v.thumbnailsUrls.length > 0 ? v.thumbnailsUrls[0] : undefined,
+    url: v.videoUrl, // signed URL for video
+  }));
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
@@ -29,26 +39,21 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* Video List */}
-      <VideoTable
-        videos={videos.map((v: Video) => ({
-          id: v.id,
-          title: v.file_name, // using file_name since title doesn’t exist
-          progress:
-            v.status === "READY"
-              ? 100
-              : v.status === "PROCESSING"
-              ? 50
-              : v.status === "UPLOADING"
-              ? 0
-              : 0,
-          thumbnail: "/placeholder-thumbnail.png", // until you add thumbnail URLs
-          url:
-            v.status === "READY"
-              ? `/storage/${v.storage_path}` // adjust based on how you serve public URLs
-              : undefined,
-        }))}
-      />
+      {/* Video List or Skeleton */}
+      {loading ? (
+        <div className="space-y-2">
+          {[...Array(5)].map((_, idx) => (
+            <div
+              key={idx}
+              className="h-16 md:h-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : mappedVideos.length > 0 ? (
+        <VideoTable videos={mappedVideos} />
+      ) : (
+        <p className="text-gray-500">No videos found.</p>
+      )}
 
       {/* Upload Modal */}
       <UploadPanel
@@ -56,5 +61,5 @@ export default function DashboardPage() {
         onClose={() => setIsUploadOpen(false)}
       />
     </div>
-  )
+  );
 }

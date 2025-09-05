@@ -1,0 +1,91 @@
+// hooks/useUpload.ts
+import { useCallback, useState } from "react";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+
+const MAX_SIZE = 500 * 1024 * 1024; // 500MB
+
+interface UploadUrlResponse {
+  uploadUrl: string;
+  storagePath: string;
+  error?: string;
+}
+
+interface VideoMetadata {
+  userId: string;
+  fileName: string;
+  storagePath: string;
+  fileSize: number;
+}
+
+export function useUpload(onClose: () => void) {
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [uploading, setUploading] = useState(false);
+  const { user } = useUser();
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (!acceptedFiles.length) return;
+    const selectedFile = acceptedFiles[0];
+
+    if (selectedFile.size > MAX_SIZE) {
+      setError("File size cannot exceed 500 MB");
+      setFile(null);
+    } else {
+      setFile(selectedFile);
+      setError(null);
+    }
+  }, []);
+
+  const handleUpload = useCallback(async () => {
+    if (!file || !user) return;
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      // 1️⃣ Request signed upload URL
+      const { data: uploadData } = await axios.post<UploadUrlResponse>("/api/upload-url", {
+        fileName: file.name,
+        fileType: file.type,
+        userId: user.id,
+      });
+
+      if (uploadData.error || !uploadData.uploadUrl) {
+        throw new Error(uploadData.error || "Failed to get upload URL");
+      }
+
+      // 2️⃣ Upload file to Supabase
+      await axios.put(uploadData.uploadUrl, file, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+          }
+        },
+      });
+
+      // 3️⃣ Save metadata
+      const videoMetadata: VideoMetadata = {
+        userId: user.id,
+        fileName: file.name,
+        storagePath: uploadData.storagePath,
+        fileSize: file.size,
+      };
+
+      await axios.post("/api/videos", videoMetadata);
+
+      // Reset state + close modal
+      setFile(null);
+      setProgress(0);
+      onClose();
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setError("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }, [file, user, onClose]);
+
+  return { file, error, progress, uploading, onDrop, handleUpload };
+}

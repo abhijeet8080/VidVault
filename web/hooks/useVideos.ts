@@ -1,42 +1,36 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { getUserVideos } from "@/lib/videos"
+import { useEffect, useState } from "react";
+import { getUserVideos, Video as VideoFromLib } from "@/lib/videos";
 
-// Define the type of a Video object
-export interface Video {
-  id: string
-  user_id: string
-  file_name: string
-  file_size: number
-  storage_path: string
-  status: "UPLOADING" | "PROCESSING" | "READY"  
-  created_at: string
-  updated_at: string
+// Extend the Video type to include URLs
+export interface Video extends VideoFromLib {
+  videoUrl?: string;
+  thumbnailsUrls?: string[];
 }
 
 export function useVideos(userId?: string) {
-  const [videos, setVideos] = useState<Video[]>([])
-  const [loading, setLoading] = useState(true)
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return
+    if (!userId) return;
 
     const fetchVideos = async () => {
       try {
-        setLoading(true)
-        const vids: Video[] = await getUserVideos(userId)
-        setVideos(vids)
+        setLoading(true);
+        const vids: Video[] = await getUserVideos(userId);
+        setVideos(vids);
       } catch (err) {
-        console.error("Error fetching videos:", err)
-        setVideos([])
+        console.error("Error fetching videos:", err);
+        setVideos([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchVideos()
-  }, [userId])
+    fetchVideos();
+  }, [userId]);
 
-  return { videos, loading }
+  return { videos, loading };
 }

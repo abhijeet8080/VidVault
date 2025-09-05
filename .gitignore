@@ -14,7 +14,7 @@
 
 # Production build
 /build
-
+/worker/node_modules
 # Miscellaneous
 .DS_Store
 *.pem

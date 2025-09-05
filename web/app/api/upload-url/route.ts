@@ -24,7 +24,6 @@ export async function POST(req: Request) {
       .createSignedUploadUrl(storagePath)
 
     if (error) throw error
-
     return NextResponse.json({
       uploadUrl: data.signedUrl,
       storagePath,
