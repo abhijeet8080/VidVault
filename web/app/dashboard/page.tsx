@@ -57,7 +57,7 @@ export default function DashboardPage() {
       <UploadPanel
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onUploadComplete={refresh} // ✅ trigger refresh after upload
+        onUploadComplete={refresh} 
       />
     </div>
   );

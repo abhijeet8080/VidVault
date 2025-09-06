@@ -114,10 +114,25 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
       setProgress(0);
       onClose();
       if (onUploadComplete) onUploadComplete();
-    } catch (err) {
-      console.error("Upload failed:", err);
-      setError("Upload failed. Please try again.");
-    } finally {
+    
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    console.error("Upload failed:", err.message);
+  } else {
+    console.error("Upload failed:", err);
+  }
+
+  // If it's a Response (like from fetch)
+  if (err instanceof Response) {
+    const text = await err.text();
+    console.error("Response error:", text);
+  }
+
+  setError(
+    err instanceof Error ? err.message : "Upload failed. Please try again."
+  );
+}
+finally {
       setUploading(false);
     }
   }, [files, user, onClose, onUploadComplete]);
