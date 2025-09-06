@@ -88,4 +88,9 @@ const worker = new Worker(
   { connection }
 )
 
-worker.on('failed', (job, err) => console.error(`Job ${job?.id} failed:`, err))
+worker.on('failed', async (job, err) => {
+  console.error(`Job ${job?.id} failed:`, err)
+  if (job) {
+    await job.retry() 
+  }
+})
