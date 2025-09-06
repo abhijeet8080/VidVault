@@ -17,7 +17,7 @@ interface VideoMetadata {
   fileSize: number;
 }
 
-export function useUpload(onClose: () => void) {
+export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number>(0);
@@ -52,11 +52,14 @@ export function useUpload(onClose: () => void) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        const { data: uploadData } = await axios.post<UploadUrlResponse>("/api/upload-url", {
-          fileName: file.name,
-          fileType: file.type,
-          userId: user.id,
-        });
+        const { data: uploadData } = await axios.post<UploadUrlResponse>(
+          "/api/upload-url",
+          {
+            fileName: file.name,
+            fileType: file.type,
+            userId: user.id,
+          }
+        );
 
         if (uploadData.error || !uploadData.uploadUrl) {
           throw new Error(uploadData.error || "Failed to get upload URL");
@@ -66,8 +69,11 @@ export function useUpload(onClose: () => void) {
           headers: { "Content-Type": file.type },
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
-              const currentFileProgress = (progressEvent.loaded / progressEvent.total) * 100;
-              const overallProgress = Math.round(((i + currentFileProgress / 100) / files.length) * 100);
+              const currentFileProgress =
+                (progressEvent.loaded / progressEvent.total) * 100;
+              const overallProgress = Math.round(
+                ((i + currentFileProgress / 100) / files.length) * 100
+              );
               setProgress(overallProgress);
             }
           },
@@ -86,13 +92,14 @@ export function useUpload(onClose: () => void) {
       setFiles([]);
       setProgress(0);
       onClose();
+      if (onUploadComplete) onUploadComplete(); 
     } catch (err) {
       console.error("Upload failed:", err);
       setError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
-  }, [files, user, onClose]);
+  }, [files, user, onClose, onUploadComplete]);
 
   return { files, error, progress, uploading, onDrop, handleUpload, removeFile };
 }

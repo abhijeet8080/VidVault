@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export interface Video {
   id: string;
@@ -13,26 +13,25 @@ export function useVideos(userId?: string) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchVideos = useCallback(async () => {
     if (!userId) return;
-
-    const fetchVideos = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/user-videos?userId=${userId}`);
-        const data = await res.json();
-        console.log('dataf form',data)
-        setVideos(data || []);
-      } catch (err) {
-        console.error(err);
-        setVideos([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVideos();
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/user-videos?userId=${userId}`);
+      const data = await res.json();
+      console.log("fetched videos:", data);
+      setVideos(data || []);
+    } catch (err) {
+      console.error(err);
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
-  return { videos, loading };
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
+
+  return { videos, loading, refresh: fetchVideos };
 }

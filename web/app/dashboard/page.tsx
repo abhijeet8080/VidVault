@@ -8,7 +8,7 @@ import { useVideos, Video } from "@/hooks/useVideos";
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const { videos, loading } = useVideos(user?.id);
+  const { videos, loading, refresh } = useVideos(user?.id); 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Map videos to the format expected by VideoTable
@@ -21,8 +21,8 @@ export default function DashboardPage() {
         : v.status === "PROCESSING"
         ? 50
         : 0,
-    thumbnail: v.thumbnailUrl, // <-- use single URL from backend
-    url: v.videoUrl, // signed URL for video
+    thumbnail: v.thumbnailUrl,
+    url: v.videoUrl,
   }));
 
   return (
@@ -57,6 +57,7 @@ export default function DashboardPage() {
       <UploadPanel
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
+        onUploadComplete={refresh} // ✅ trigger refresh after upload
       />
     </div>
   );

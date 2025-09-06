@@ -19,10 +19,14 @@ import { Progress } from "@/components/ui/progress";
 interface UploadPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  onUploadComplete?: () => void; 
 }
 
-export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
-  // updated hook now manages multiple files
+export default function UploadPanel({
+  isOpen,
+  onClose,
+  onUploadComplete,
+}: UploadPanelProps) {
   const {
     files,
     error,
@@ -31,7 +35,7 @@ export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
     onDrop,
     handleUpload,
     removeFile,
-  } = useUpload(onClose);
+  } = useUpload(onClose, onUploadComplete); // ✅ pass down
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -68,7 +72,6 @@ export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
                 key={index}
                 className="flex items-center justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111]"
               >
-                {/* Left side: icon + details */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <FileVideo className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
                   <div className="flex-1 min-w-0">
@@ -81,7 +84,6 @@ export default function UploadPanel({ isOpen, onClose }: UploadPanelProps) {
                   </div>
                 </div>
 
-                {/* Right side: remove button */}
                 <button
                   onClick={() => removeFile(index)}
                   className="rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
