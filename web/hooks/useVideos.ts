@@ -1,12 +1,12 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { getUserVideos, Video as VideoFromLib } from "@/lib/videos";
 
-// Extend the Video type to include URLs
-export interface Video extends VideoFromLib {
+export interface Video {
+  id: string;
+  file_name: string;
+  file_size: number;
+  status: "UPLOADING" | "PROCESSING" | "READY";
   videoUrl?: string;
-  thumbnailsUrls?: string[];
+  thumbnailUrl?: string;
 }
 
 export function useVideos(userId?: string) {
@@ -19,10 +19,12 @@ export function useVideos(userId?: string) {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const vids: Video[] = await getUserVideos(userId);
-        setVideos(vids);
+        const res = await fetch(`/api/user-videos?userId=${userId}`);
+        const data = await res.json();
+        console.log('dataf form',data)
+        setVideos(data || []);
       } catch (err) {
-        console.error("Error fetching videos:", err);
+        console.error(err);
         setVideos([]);
       } finally {
         setLoading(false);

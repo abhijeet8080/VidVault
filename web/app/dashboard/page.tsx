@@ -21,7 +21,7 @@ export default function DashboardPage() {
         : v.status === "PROCESSING"
         ? 50
         : 0,
-    thumbnail: v.thumbnailsUrls && v.thumbnailsUrls.length > 0 ? v.thumbnailsUrls[0] : undefined,
+    thumbnail: v.thumbnailUrl, // <-- use single URL from backend
     url: v.videoUrl, // signed URL for video
   }));
 
@@ -39,7 +39,6 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* Video List or Skeleton */}
       {loading ? (
         <div className="space-y-2">
           {[...Array(5)].map((_, idx) => (
@@ -55,7 +54,6 @@ export default function DashboardPage() {
         <p className="text-gray-500">No videos found.</p>
       )}
 
-      {/* Upload Modal */}
       <UploadPanel
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}

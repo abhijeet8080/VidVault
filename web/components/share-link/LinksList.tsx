@@ -1,10 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Globe, Lock, Mail, Clock, Eye, Link2 } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Globe,
+  Lock,
+  Mail,
+  Clock,
+  Eye,
+  Link2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export interface ShareLink {
   id: string;
@@ -50,19 +67,19 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
     return new Date(date).toLocaleString();
   };
 
-    const getExpiryLabel = (expiry: string) => {
-  if (expiry === "forever") return "Never expires";
+  const getExpiryLabel = (expiry: string) => {
+    if (expiry === "forever") return "Never expires";
 
-  const expiryDate = new Date(expiry);
-  if (isNaN(expiryDate.getTime())) {
-    return `Expires in ${expiry}`; // fallback for presets like "1h"
-  }
+    const expiryDate = new Date(expiry);
+    if (isNaN(expiryDate.getTime())) {
+      return `Expires in ${expiry}`;
+    }
 
-  return `Expires on ${expiryDate.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  })}`;
-};
+    return `Expires on ${expiryDate.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    })}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -72,28 +89,30 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
         Shared Links
       </h2>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse rounded-lg overflow-hidden">
-          <thead className="bg-muted/50 text-left text-xs uppercase">
-            <tr>
-              <th className="px-4 py-2">Visibility</th>
-              <th className="px-4 py-2">Share URL</th>
-              <th className="px-4 py-2">Expiry</th>
-              <th className="px-4 py-2">Last Viewed</th>
-              <th className="px-4 py-2">Emails</th>
-              <th className="px-4 py-2 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="overflow-x-auto rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Visibility</TableHead>
+              <TableHead>Share URL</TableHead>
+              <TableHead>Expiry</TableHead>
+              <TableHead>Last Viewed</TableHead>
+              <TableHead>Emails</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {links.map((link) => {
-              const url = `${process.env.NEXT_PUBLIC_APP_URL}/share/${link.token}`;
+              let url = "";
+              if (link.visibility === "PRIVATE") {
+                url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/p/${link.token}`;
+              } else {
+                url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/s/${link.token}`;
+              }
               return (
-                <tr
-                  key={link.id}
-                  className="border-t hover:bg-muted/30 transition-colors"
-                >
+                <TableRow key={link.id}>
                   {/* Visibility */}
-                  <td className="px-4 py-3">
+                  <TableCell>
                     {link.visibility === "PUBLIC" ? (
                       <Badge
                         variant="outline"
@@ -109,10 +128,10 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
                         <Lock className="w-3 h-3" /> Private
                       </Badge>
                     )}
-                  </td>
+                  </TableCell>
 
                   {/* URL */}
-                  <td className="px-4 py-3 max-w-[200px] truncate">
+                  <TableCell className="max-w-[200px] truncate">
                     <a
                       href={url}
                       target="_blank"
@@ -121,26 +140,26 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
                     >
                       {url}
                     </a>
-                  </td>
+                  </TableCell>
 
                   {/* Expiry */}
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
                       {getExpiryLabel(link.expiry)}
                     </div>
-                  </td>
+                  </TableCell>
 
                   {/* Last Viewed */}
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
                       {formatDate(link.last_viewed_at)}
                     </div>
-                  </td>
+                  </TableCell>
 
                   {/* Emails */}
-                  <td className="px-4 py-3">
+                  <TableCell>
                     {link.visibility === "PRIVATE" && link.emails.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {link.emails.map((email) => (
@@ -157,10 +176,10 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
-                  </td>
+                  </TableCell>
 
                   {/* Copy Button */}
-                  <td className="px-4 py-3 text-right">
+                  <TableCell className="text-right">
                     <Button
                       size="icon"
                       variant="ghost"
@@ -172,12 +191,12 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
                         <Copy className="w-4 h-4" />
                       )}
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

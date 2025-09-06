@@ -67,10 +67,10 @@ export default function VideoMetadata({
       ),
     },
     {
-      label: "Thumbnails",
-      value: `${video.thumbnails.length}`,
-      icon: ImageIcon,
-    },
+  label: "Thumbnails",
+  value: `${video.thumbnails?.length ?? 0}`, 
+  icon: ImageIcon,
+},
   ];
 
   return (

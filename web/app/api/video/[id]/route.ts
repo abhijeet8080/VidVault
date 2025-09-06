@@ -6,8 +6,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }  // params is now a Promise
+) {
+  const { id } = await context.params;   // <-- await it
 
   // Fetch the video from DB
   const { data: video } = await supabase
@@ -18,10 +21,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   if (!video) return NextResponse.json({ error: "Video not found" }, { status: 404 });
 
-  // Create signed URL (1 hour or longer)
+  // Create signed URL (1 hour)
   const { data, error } = await supabase.storage
     .from("videos")
-    .createSignedUrl(video.storage_path, 60 * 60); // 1 hour
+    .createSignedUrl(video.storage_path, 60 * 60);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

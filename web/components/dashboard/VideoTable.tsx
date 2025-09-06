@@ -18,8 +18,8 @@ interface VideoItem {
   id: string;
   title: string;
   progress: number; // 0 - 100
-  thumbnail?: string;
-  url?: string;
+  thumbnail?: string; // single thumbnail URL
+  url?: string;       // signed video URL
 }
 
 interface VideoTableProps {
@@ -93,13 +93,11 @@ export default function VideoTable({ videos }: VideoTableProps) {
                 onClick={(e) => e.stopPropagation()} // prevent row navigation when clicking download
               >
                 {video.progress === 100 && video.url ? (
-                  <Button
-                    size="sm"
-                    className="w-28 justify-center"
-                    
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
+                  <Button asChild size="sm" className="w-28 justify-center">
+                    <a href={video.url} download>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </a>
                   </Button>
                 ) : (
                   <Button size="sm" disabled className="w-28 justify-center">
