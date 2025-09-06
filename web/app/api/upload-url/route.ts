@@ -7,6 +7,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY! 
 )
 
+function sanitizeFileName(name: string): string {
+  return name
+    .normalize("NFKD")                // remove accents
+    .replace(/[^\w.-]/g, "_")         // replace unsafe chars
+    .replace(/_+/g, "_")              // collapse multiple _
+    .replace(/^_+|_+$/g, "");         // trim leading/trailing _
+}
+
 export async function POST(req: Request) {
   try {
     const { fileName, fileType, userId } = await req.json()
@@ -15,8 +23,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 })
     }
 
-    // Storage path (folder by user + random file name to avoid collisions)
-    const storagePath = `${userId}/${Date.now()}-${fileName}`
+    // Sanitize before using in storage path
+    const safeName = sanitizeFileName(fileName)
+    const storagePath = `${userId}/${Date.now()}-${safeName}`
 
     // Create a signed URL for upload
     const { data, error } = await supabase.storage
@@ -24,16 +33,15 @@ export async function POST(req: Request) {
       .createSignedUploadUrl(storagePath)
 
     if (error) throw error
+
     return NextResponse.json({
       uploadUrl: data.signedUrl,
-      storagePath,
+      storagePath,        // safe path stored in DB
+      originalFileName: fileName  // keep original for UI
     })
   } catch (err: unknown) {
     console.error("Signed URL error:", err)
-
-    // Safely check if err is an Error object
     const message = err instanceof Error ? err.message : "Unknown error"
-
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
