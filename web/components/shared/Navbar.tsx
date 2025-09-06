@@ -78,8 +78,8 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-6 pb-4 space-y-4 bg-white/95 dark:bg-[#0D0D0D]/95 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 shadow-lg rounded-b-2xl">
-          <Link href="/dahsboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Compass className="h-5 w-5" /> Explore
+          <Link href="/dashboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <Compass className="h-5 w-5" /> Dashboard
           </Link>
           
           <Link href="/library" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
