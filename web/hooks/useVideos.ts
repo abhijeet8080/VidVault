@@ -19,7 +19,7 @@ export function useVideos(userId?: string) {
     try {
       setLoading(true);
 
-      const res = await axios.get<Video[]>(`/api/user-videos`, {
+      const res = await axios.get<Video[]>(`${process.env.NEXT_PUBLIC_APP_URL}/api/user-videos`, {
         params: { userId },
       });
 

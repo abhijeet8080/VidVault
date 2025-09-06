@@ -45,7 +45,7 @@ export default function ShareLinkFormModal({ videoId }: ShareLinkFormModalProps)
       .filter((e) => e.length > 0);
 
     try {
-      const { data } = await axios.post("/api/share-link", {
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/share-link`, {
         videoId,
         visibility,
         emails: visibility === "PRIVATE" ? emailList : [],

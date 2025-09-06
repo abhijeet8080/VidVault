@@ -29,7 +29,7 @@ export default function ShareLinkPage() {
 
     const fetchVideo = async () => {
       try {
-        const res = await axios.get(`/api/share-link/${params.token}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/share-link/${params.token}`);
         if (res.data.video) {
           setVideo(res.data.video);
         } else {

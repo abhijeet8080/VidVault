@@ -40,7 +40,7 @@ async function fetchSignedUrl(bucket: string, path: string): Promise<string | un
   if (!path) return undefined;
 
   try {
-    const res = await axios.get<{ url?: string }>("/api/signed-url", {
+    const res = await axios.get<{ url?: string }>(`${process.env.NEXT_PUBLIC_APP_URL}/api/signed-url`, {
       params: {
         bucket,
         path: encodeURIComponent(path),

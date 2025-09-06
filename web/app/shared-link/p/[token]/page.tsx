@@ -48,7 +48,7 @@ export default function PrivateShareLinkPage() {
 
       try {
         const res = await axios.get<VideoResponse>(
-          `/api/share-link/${params.token}`,
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/share-link/${params.token}`,
           {
             headers: {
               Authorization: user.primaryEmailAddress.emailAddress, // ✅ backend expects email
