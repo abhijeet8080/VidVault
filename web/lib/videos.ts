@@ -40,10 +40,11 @@ async function fetchSignedUrl(bucket: string, path: string): Promise<string | un
   if (!path) return undefined;
 
   try {
-    const res = await axios.get<{ url?: string }>(`${process.env.NEXT_PUBLIC_APP_URL}/api/signed-url`, {
+    // const res = await axios.get<{ url?: string }>(`${process.env.NEXT_PUBLIC_APP_URL}/api/signed-url`, {
+    const res = await axios.get<{ url?: string }>(`/api/signed-url`, {
       params: {
         bucket,
-        path: encodeURIComponent(path),
+        path,
       },
     });
 
@@ -104,10 +105,9 @@ export async function getVideoById(videoId: string) {
     .single();
 
   if (error || !video) return null;
-      console.log('video by id',video)
   // Signed URL for video
   const videoUrl = await fetchSignedUrl("videos", video.storage_path);
-
+    
   // Signed URLs for thumbnails
   const thumbnailsUrls = await Promise.all(
     (video.thumbnails || []).map((t: Thumbnail) => fetchSignedUrl("thumbnails", t.storage_path))

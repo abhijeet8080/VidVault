@@ -54,6 +54,7 @@ export default function ThumbnailCarousel({
               fill
               sizes="(max-width: 768px) 100vw, 25vw"
               className="object-cover transition-transform duration-500 hover:scale-110"
+              unoptimized
             />
           </div>
         ))}

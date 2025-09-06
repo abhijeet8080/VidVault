@@ -13,7 +13,7 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ videoUrl, thumbnail, loading: initialLoading }: VideoPlayerProps) {
   const [loading, setLoading] = useState(initialLoading ?? true);
-
+  console.log('video urll',videoUrl, thumbnail)
   return (
     <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl bg-black dark:bg-gray-800">
       {videoUrl && (

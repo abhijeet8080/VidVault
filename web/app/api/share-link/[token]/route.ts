@@ -15,7 +15,6 @@ export async function GET(
     if (!token) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
-    console.log("Token", token);
 
     // 🎯 Fetch share link
     const { data: shareLink, error: linkError } = await supabase
@@ -23,7 +22,6 @@ export async function GET(
       .select("*")
       .eq("token", token)
       .single();
-    console.log("shareLink", shareLink);
 
     if (linkError || !shareLink) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
@@ -37,7 +35,6 @@ export async function GET(
     // 🔐 Check visibility
     if (shareLink.visibility === "PRIVATE") {
       const authHeader = req.headers.get("authorization");
-      console.log("authorization", authHeader);
 
       if (!authHeader) {
         return NextResponse.json(

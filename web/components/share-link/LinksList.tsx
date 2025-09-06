@@ -105,9 +105,11 @@ export default function ShareLinksList({ links }: ShareLinksListProps) {
             {links.map((link) => {
               let url = "";
               if (link.visibility === "PRIVATE") {
-                url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/p/${link.token}`;
+                url = `/shared-link/p/${link.token}`;
+                // url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/p/${link.token}`;
               } else {
-                url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/s/${link.token}`;
+                // url = `${process.env.NEXT_PUBLIC_APP_URL}/shared-link/s/${link.token}`;
+                url = `/shared-link/s/${link.token}`;
               }
               return (
                 <TableRow key={link.id}>

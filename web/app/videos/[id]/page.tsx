@@ -16,7 +16,6 @@ export default function VideoPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!id) return;
 

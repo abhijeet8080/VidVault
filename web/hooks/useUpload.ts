@@ -53,7 +53,8 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
         const file = files[i];
 
         const { data: uploadData } = await axios.post<UploadUrlResponse>(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/upload-url`,
+          `/api/upload-url`,
+          // `${process.env.NEXT_PUBLIC_APP_URL}/api/upload-url`,
           {
             fileName: file.name,
             fileType: file.type,
@@ -86,7 +87,8 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
           fileSize: file.size,
         };
 
-        await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/videos`, videoMetadata);
+        // await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/videos`, videoMetadata);
+        await axios.post(`/api/videos`, videoMetadata);
       }
 
       setFiles([]);
