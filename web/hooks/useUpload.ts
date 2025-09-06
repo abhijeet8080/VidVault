@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 
 const MAX_SIZE = 500 * 1024 * 1024; // 500MB
@@ -51,44 +52,35 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        // 🔹 Step 1: Get upload URL
-        const uploadRes = await fetch(`/api/upload-url`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        const { data: uploadData } = await axios.post<UploadUrlResponse>(
+          `/api/upload-url`,
+          // `${process.env.NEXT_PUBLIC_APP_URL}/api/upload-url`,
+          {
             fileName: file.name,
             fileType: file.type,
             userId: user.id,
-          }),
-        });
-
-        const uploadData: UploadUrlResponse = await uploadRes.json();
-
+          }
+        );
         if (uploadData.error || !uploadData.uploadUrl) {
           throw new Error(uploadData.error || "Failed to get upload URL");
         }
 
-        // 🔹 Step 2: Upload file to storage (progress tracking with XMLHttpRequest since fetch doesn't support it)
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", uploadData.uploadUrl);
-
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const currentFileProgress = (event.loaded / event.total) * 100;
+        await axios.put(uploadData.uploadUrl, file, {
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const currentFileProgress =
+                (progressEvent.loaded / progressEvent.total) * 100;
               const overallProgress = Math.round(
                 ((i + currentFileProgress / 100) / files.length) * 100
               );
               setProgress(overallProgress);
             }
-          };
-
-          xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject());
-          xhr.onerror = reject;
-          xhr.send(file);
+          },
         });
 
-        // 🔹 Step 3: Save metadata
         const videoMetadata: VideoMetadata = {
           userId: user.id,
           fileName: file.name,
@@ -96,11 +88,8 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
           fileSize: file.size,
         };
 
-        await fetch(`/api/videos`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(videoMetadata),
-        });
+        // await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/videos`, videoMetadata);
+        await axios.post(`/api/videos`, videoMetadata);
       }
 
       setFiles([]);
@@ -115,5 +104,13 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
     }
   }, [files, user, onClose, onUploadComplete]);
 
-  return { files, error, progress, uploading, onDrop, handleUpload, removeFile };
+  return {
+    files,
+    error,
+    progress,
+    uploading,
+    onDrop,
+    handleUpload,
+    removeFile,
+  };
 }
