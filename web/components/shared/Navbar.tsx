@@ -86,9 +86,7 @@ export default function Navbar() {
           <Link href="/dahsboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
             <Compass className="h-5 w-5" /> Explore
           </Link>
-          <Link href="/upload" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Upload className="h-5 w-5" /> Upload
-          </Link>
+          
           <Link href="/library" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
             <Library className="h-5 w-5" /> Library
           </Link>
