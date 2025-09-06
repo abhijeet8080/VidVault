@@ -31,12 +31,7 @@ export default function Navbar() {
               </span>
             </Link>
 
-            <Link href="/upload" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
-              <Upload className="h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-              <span className="relative after:block after:h-[2px] after:w-0 after:bg-indigo-600 dark:after:bg-indigo-400 after:transition-all group-hover:after:w-full">
-                Upload
-              </span>
-            </Link>
+            
 
             <Link href="/library" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
               <Library className="h-5 w-5 group-hover:scale-110 transition-transform" />

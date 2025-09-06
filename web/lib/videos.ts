@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import axios from "axios";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,15 +40,19 @@ async function fetchSignedUrl(bucket: string, path: string): Promise<string | un
   if (!path) return undefined;
 
   try {
-    const res = await fetch(`/api/signed-url?bucket=${bucket}&path=${encodeURIComponent(path)}`);
-    const data = await res.json();
-    return data.url as string | undefined;
+    const res = await axios.get<{ url?: string }>("/api/signed-url", {
+      params: {
+        bucket,
+        path: encodeURIComponent(path),
+      },
+    });
+
+    return res.data.url;
   } catch (err) {
     console.error("Error fetching signed URL:", err);
     return undefined;
   }
 }
-
 // Fetch all videos for a user with signed URLs
 export async function getUserVideos(userId: string): Promise<Video[]> {
   const { data: videos, error } = await supabase
