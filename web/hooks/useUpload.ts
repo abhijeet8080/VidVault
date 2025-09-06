@@ -51,7 +51,7 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        // Get signed upload URL
+        // 1️⃣ Get signed upload URL
         const res = await fetch(`/api/upload-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -63,15 +63,17 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
         });
 
         const uploadData: UploadUrlResponse = await res.json();
-        if (uploadData.error || !uploadData.uploadUrl) {
-          throw new Error(uploadData.error || "Failed to get upload URL");
+        if (!res.ok || uploadData.error || !uploadData.uploadUrl) {
+          throw new Error(uploadData.error || `Failed to get upload URL (${res.status})`);
         }
 
-        // Upload file with XMLHttpRequest to support progress tracking
+        // 2️⃣ Upload file with XMLHttpRequest (progress support + Safari fix)
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", uploadData.uploadUrl);
-          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+
+          // 🚨 DO NOT set Content-Type (Supabase already handles it via signed URL)
+          // xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
 
           xhr.upload.onprogress = (event) => {
             if (event.lengthComputable) {
@@ -83,19 +85,19 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
             }
           };
 
-          xhr.onload = () => {
+          xhr.onloadend = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               resolve();
             } else {
-              reject(new Error(`Upload failed with status ${xhr.status}`));
+              reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
             }
           };
 
-          xhr.onerror = () => reject(new Error("Upload failed"));
+          xhr.onerror = () => reject(new Error("Network error during upload"));
           xhr.send(file);
         });
 
-        // Save video metadata
+        // 3️⃣ Save video metadata
         const videoMetadata: VideoMetadata = {
           userId: user.id,
           fileName: file.name,
@@ -103,36 +105,31 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
           fileSize: file.size,
         };
 
-        await fetch(`/api/videos`, {
+        const saveRes = await fetch(`/api/videos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(videoMetadata),
         });
+
+        if (!saveRes.ok) {
+          throw new Error(`Metadata save failed: ${saveRes.status} ${await saveRes.text()}`);
+        }
       }
 
+      // ✅ Done
       setFiles([]);
       setProgress(0);
       onClose();
       if (onUploadComplete) onUploadComplete();
-    
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    console.error("Upload failed:", err.message);
-  } else {
-    console.error("Upload failed:", err);
-  }
-
-  // If it's a Response (like from fetch)
-  if (err instanceof Response) {
-    const text = await err.text();
-    console.error("Response error:", text);
-  }
-
-  setError(
-    err instanceof Error ? err.message : "Upload failed. Please try again."
-  );
-}
-finally {
+      if (err instanceof Error) {
+        console.error("Upload failed:", err.message);
+        setError(err.message);
+      } else {
+        console.error("Upload failed:", err);
+        setError("Upload failed. Please try again.");
+      }
+    } finally {
       setUploading(false);
     }
   }, [files, user, onClose, onUploadComplete]);
