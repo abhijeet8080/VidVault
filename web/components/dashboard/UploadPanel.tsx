@@ -1,4 +1,3 @@
-// components/UploadPanel.tsx
 "use client";
 
 import { FileVideo, AlertCircle, X } from "lucide-react";
@@ -35,13 +34,13 @@ export default function UploadPanel({
     onDrop,
     handleUpload,
     removeFile,
-  } = useUpload(onClose, onUploadComplete); // ✅ pass down
+  } = useUpload(onClose, onUploadComplete);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full max-w-lg rounded-3xl p-6">
+      <DialogContent className="w-full max-w-lg sm:max-w-md md:max-w-lg rounded-3xl p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-center">
+          <DialogTitle className="text-xl sm:text-2xl text-center">
             Upload Video
           </DialogTitle>
         </DialogHeader>
@@ -70,10 +69,10 @@ export default function UploadPanel({
             {files.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111]"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111]"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <FileVideo className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                  <FileVideo className="h-7 w-7 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                       {file.name}
@@ -86,7 +85,7 @@ export default function UploadPanel({
 
                 <button
                   onClick={() => removeFile(index)}
-                  className="rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                  className="rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700 transition self-start sm:self-auto"
                 >
                   <X className="h-4 w-4 text-gray-500 hover:text-red-500" />
                 </button>
@@ -101,13 +100,18 @@ export default function UploadPanel({
         )}
 
         {/* Actions */}
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
+        <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleUpload}
             disabled={files.length === 0 || !!error || uploading}
+            className="w-full sm:w-auto"
           >
             {uploading ? `Uploading ${progress}%` : "Upload"}
           </Button>

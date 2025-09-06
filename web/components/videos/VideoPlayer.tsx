@@ -28,7 +28,7 @@ export default function VideoPlayer({ videoUrl, thumbnail, loading: initialLoadi
 
       {loading && thumbnail && (
         <div className="absolute inset-0 flex items-center justify-center bg-black dark:bg-gray-900">
-          <Image src={thumbnail} alt="Video thumbnail" fill className="object-cover blur-sm" />
+          <Image src={thumbnail} alt="Video thumbnail" fill className="object-cover blur-sm" unoptimized />
           <PlayCircle className="absolute w-16 h-16 text-white animate-pulse" />
         </div>
       )}

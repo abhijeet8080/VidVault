@@ -75,6 +75,7 @@ export default function LibraryPage() {
                     src={video.thumbnailsUrls[0]}
                     alt={video.file_name}
                     fill
+                    unoptimized
                     className="object-cover group-hover:scale-105 transition-transform"
                   />
                 ) : (

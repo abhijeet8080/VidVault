@@ -19,7 +19,7 @@ interface VideoItem {
   title: string;
   progress: number; // 0 - 100
   thumbnail?: string; // single thumbnail URL
-  url?: string;       // signed video URL
+  url?: string; // signed video URL
 }
 
 interface VideoTableProps {
@@ -28,7 +28,7 @@ interface VideoTableProps {
 
 export default function VideoTable({ videos }: VideoTableProps) {
   const router = useRouter();
-
+  console.log("videos", videos[0].thumbnail);
   const getProgressColor = (progress: number) => {
     if (progress < 40) return "bg-red-500 dark:bg-red-600";
     if (progress < 80) return "bg-yellow-500 dark:bg-yellow-500/80";
@@ -54,17 +54,19 @@ export default function VideoTable({ videos }: VideoTableProps) {
               onClick={() => router.push(`/videos/${video.id}`)}
             >
               {/* Thumbnail */}
-              <TableCell className="w-28">
+              <TableCell className="w-40">
                 {video.thumbnail ? (
-                  <Image
-                    src={video.thumbnail}
-                    alt={video.title}
-                    width={112}
-                    height={64}
-                    className="rounded-lg shadow-sm object-cover group-hover:shadow-md"
-                  />
+                  <div className="w-40 h-24 relative rounded-lg overflow-hidden">
+                    <Image
+                      src={video.thumbnail}
+                      alt={video.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
                 ) : (
-                  <div className="w-28 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <div className="w-40 h-24 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
                     <FileVideo className="h-8 w-8 text-gray-400" />
                   </div>
                 )}
