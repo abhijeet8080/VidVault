@@ -23,7 +23,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // 1️⃣ Insert new video record
     const { data, error } = await supabase
       .from("videos")
       .insert([
@@ -40,13 +39,17 @@ export async function POST(req: Request) {
 
     if (error) throw error
 
-    // 2️⃣ Enqueue job for background processing
     await videoQueue.add("process-video", {
-      videoId: data.id,          
-      storagePath: data.storage_path
+      videoId: data.id,
+      storagePath: data.storage_path,
     })
 
-    // 3️⃣ Return inserted video metadata
+    if (process.env.WORKER_URL) {
+      fetch(`${process.env.WORKER_URL}/wake`).catch((err) => {
+        console.warn("⚠️ Worker wake ping failed:", err)
+      })
+    }
+
     return NextResponse.json({ video: data })
   } catch (err: unknown) {
     console.error("Insert video error:", err)

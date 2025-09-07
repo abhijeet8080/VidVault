@@ -1,16 +1,17 @@
 // src/index.ts
-import 'dotenv/config'  // load env variables first
+import 'dotenv/config'  
 import express from 'express'
 
-// --- Start worker logic ---
-import './videoProcessor'  // your worker logic runs here
+import './videoProcessor' 
 
 console.log('Worker is running…')
 
-// --- Start Express server for Render health checks ---
 const app = express()
 const PORT = process.env.PORT || 10000
 
 app.get('/', (_, res) => res.send('Worker alive!'))
-
+app.get("/wake", async (_, res) => {
+  console.log("⏰ Wake request received – worker is alive");
+  res.send("Worker awake!");
+});
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
