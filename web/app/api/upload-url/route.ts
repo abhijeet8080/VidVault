@@ -36,8 +36,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       uploadUrl: data.signedUrl,
-      storagePath,        // safe path stored in DB
-      originalFileName: fileName  // keep original for UI
+      storagePath,        
+      originalFileName: fileName 
     })
   } catch (err: unknown) {
     console.error("Signed URL error:", err)

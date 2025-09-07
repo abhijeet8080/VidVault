@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     videos.map(async (v) => {
       const videoUrlData = await supabase.storage
         .from("videos")
-        .createSignedUrl(v.storage_path, 60 * 60); // 1 hour validity
+        .createSignedUrl(v.storage_path, 60 * 60); 
 
       // ✅ Only generate signed URL for the first thumbnail
       let firstThumbnailUrl: string | null = null;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       return {
         ...v,
         videoUrl: videoUrlData.data?.signedUrl,
-        thumbnailUrl: firstThumbnailUrl, // single URL
+        thumbnailUrl: firstThumbnailUrl, 
       };
     })
   );

@@ -14,7 +14,7 @@ interface ShareLink {
   id: string;
   video_id: string;
   visibility: string;
-  emails: string[]; // stored as jsonb
+  emails: string[]; 
   token: string;
   expiry: string;
   last_viewed_at: string | null;
@@ -36,7 +36,7 @@ export interface Video {
 }
 
 // Helper to fetch signed URL from your API route
-async function fetchSignedUrl(bucket: string, path: string): Promise<string | undefined> {
+export async function fetchSignedUrl(bucket: string, path: string): Promise<string | undefined> {
   if (!path) return undefined;
 
   try {
@@ -115,3 +115,5 @@ export async function getVideoById(videoId: string) {
 
   return { ...video, videoUrl, thumbnailsUrls };
 }
+
+

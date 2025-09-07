@@ -72,7 +72,6 @@ export function useUpload(onClose: () => void, onUploadComplete?: () => void) {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", uploadData.uploadUrl);
 
-          // 🚨 DO NOT set Content-Type (Supabase already handles it via signed URL)
           // xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
 
           xhr.upload.onprogress = (event) => {

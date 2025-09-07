@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     // 2️⃣ Enqueue job for background processing
     await videoQueue.add("process-video", {
-      videoId: data.id,           // UUID from videos table
+      videoId: data.id,          
       storagePath: data.storage_path
     })
 

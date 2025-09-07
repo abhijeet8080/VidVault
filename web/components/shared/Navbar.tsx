@@ -2,12 +2,16 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, Video, Compass, Upload, Library } from "lucide-react"
+import { Menu, X, Video, Compass, Library, Share2 } from "lucide-react"
 import { ModeToggle } from "./ThemeToggleButton"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleLinkClick = () => {
+    setIsOpen(false) // close dropdown on link click
+  }
 
   return (
     <nav className="w-full sticky top-0 z-50 bg-white/60 dark:bg-[#0D0D0D]/60 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
@@ -31,12 +35,17 @@ export default function Navbar() {
               </span>
             </Link>
 
-            
-
             <Link href="/library" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
               <Library className="h-5 w-5 group-hover:scale-110 transition-transform" />
               <span className="relative after:block after:h-[2px] after:w-0 after:bg-indigo-600 dark:after:bg-indigo-400 after:transition-all group-hover:after:w-full">
                 Library
+              </span>
+            </Link>
+
+            <Link href="/links" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
+              <Share2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <span className="relative after:block after:h-[2px] after:w-0 after:bg-indigo-600 dark:after:bg-indigo-400 after:transition-all group-hover:after:w-full">
+                Shared Links
               </span>
             </Link>
           </div>
@@ -75,15 +84,19 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (Overlay only on mobile) */}
       {isOpen && (
-        <div className="md:hidden px-6 pb-4 space-y-4 bg-white/95 dark:bg-[#0D0D0D]/95 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 shadow-lg rounded-b-2xl">
-          <Link href="/dashboard" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+        <div className="md:hidden absolute top-16 left-0 w-full px-6 pb-4 space-y-4 bg-white/95 dark:bg-[#0D0D0D]/95 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 shadow-lg rounded-b-2xl z-50">
+          <Link href="/dashboard" onClick={handleLinkClick} className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
             <Compass className="h-5 w-5" /> Dashboard
           </Link>
           
-          <Link href="/library" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <Link href="/library" onClick={handleLinkClick} className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
             <Library className="h-5 w-5" /> Library
+          </Link>
+
+          <Link href="/links" onClick={handleLinkClick} className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <Share2 className="h-5 w-5" /> Shared Links
           </Link>
 
           {/* Theme toggle */}
@@ -94,7 +107,10 @@ export default function Navbar() {
           {/* Clerk auth */}
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all">
+              <button
+                onClick={handleLinkClick}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all"
+              >
                 Sign In
               </button>
             </SignInButton>

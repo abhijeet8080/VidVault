@@ -5,28 +5,24 @@ import UploadPanel from "@/components/dashboard/UploadPanel";
 import VideoTable from "@/components/dashboard/VideoTable";
 import { useUser } from "@clerk/nextjs";
 import { useVideos, Video } from "@/hooks/useVideos";
+import { Film } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const { videos, loading, refresh } = useVideos(user?.id); 
+  const { videos, loading, refresh } = useVideos(user?.id);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Map videos to the format expected by VideoTable
   const mappedVideos = videos.map((v: Video) => ({
     id: v.id,
     title: v.file_name,
-    progress:
-      v.status === "READY"
-        ? 100
-        : v.status === "PROCESSING"
-        ? 50
-        : 0,
+    progress: v.status === "READY" ? 100 : v.status === "PROCESSING" ? 50 : 0,
     thumbnail: v.thumbnailUrl,
     url: v.videoUrl,
   }));
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-10 min-h-screen">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           My Dashboard
@@ -51,13 +47,23 @@ export default function DashboardPage() {
       ) : mappedVideos.length > 0 ? (
         <VideoTable videos={mappedVideos} />
       ) : (
-        <p className="text-gray-500">No videos found.</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center h-[60vh]">
+          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
+            <Film className="w-10 h-10 text-gray-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-700">
+            No videos found
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">
+            You haven’t uploaded any videos yet. Start by adding your first one!
+          </p>
+        </div>
       )}
 
       <UploadPanel
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onUploadComplete={refresh} 
+        onUploadComplete={refresh}
       />
     </div>
   );

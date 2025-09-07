@@ -1,30 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getUserVideos, Video } from "@/lib/videos";
+import {  useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Play, Clock } from "lucide-react";
+import { Play, Clock, Library } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import UploadPanel from "@/components/dashboard/UploadPanel";
+import { useVideos } from "@/hooks/useVideos";
 
 export default function LibraryPage() {
   const { user, isLoaded } = useUser();
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const { videos, loading, refresh } = useVideos(user?.id);
 
-  useEffect(() => {
-    if (!isLoaded || !user?.id) return;
-
-    const fetchVideos = async () => {
-      setLoading(true);
-      const vids = await getUserVideos(user.id);
-      setVideos(vids);
-      setLoading(false);
-    };
-
-    fetchVideos();
-  }, [isLoaded, user?.id]);
+  
 
   if (!isLoaded) {
     return (
@@ -44,7 +36,7 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 min-h-screen">
       <h1 className="text-2xl font-bold tracking-tight">Your Library</h1>
 
       {/* Video Grid */}
@@ -59,7 +51,18 @@ export default function LibraryPage() {
           ))}
         </div>
       ) : videos.length === 0 ? (
-        <p className="text-muted-foreground">No videos found in your library.</p>
+         <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+        <Library className="w-8 h-8 text-muted-foreground" />
+      </div>
+      <h2 className="text-lg font-semibold text-foreground">No videos in your library</h2>
+      <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+        It looks like your library is empty. Start uploading videos to keep them organized here.
+      </p>
+      <Button onClick={() => setIsUploadOpen(true)}>
+        Upload Video
+      </Button>
+    </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {videos.map((video) => (
@@ -70,9 +73,9 @@ export default function LibraryPage() {
             >
               {/* Thumbnail */}
               <div className="relative aspect-video rounded-xl overflow-hidden shadow-md bg-black">
-                {video.thumbnailsUrls?.[0] ? (
+                {video.thumbnailUrl ? (
                   <Image
-                    src={video.thumbnailsUrls[0]}
+                    src={video.thumbnailUrl}
                     alt={video.file_name}
                     fill
                     unoptimized
@@ -95,13 +98,19 @@ export default function LibraryPage() {
                 <h2 className="text-sm font-semibold truncate">{video.file_name}</h2>
                 <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                   <Clock className="w-3 h-3" />
-                  {new Date(video.created_at).toLocaleDateString()}
+                  {video.created_at ? new Date(video.created_at).toLocaleDateString() : "-"}
+
                 </div>
               </div>
             </Link>
           ))}
         </div>
       )}
+      <UploadPanel
+              isOpen={isUploadOpen}
+              onClose={() => setIsUploadOpen(false)}
+              onUploadComplete={refresh}
+            />
     </div>
   );
 }

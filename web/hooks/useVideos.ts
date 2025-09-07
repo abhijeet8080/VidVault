@@ -8,6 +8,7 @@ export interface Video {
   status: "UPLOADING" | "PROCESSING" | "READY";
   videoUrl?: string;
   thumbnailUrl?: string;
+  created_at?:string
 }
 
 export function useVideos(userId?: string) {
@@ -23,7 +24,7 @@ export function useVideos(userId?: string) {
       const res = await axios.get<Video[]>(`/api/user-videos`, {
         params: { userId },
       });
-
+      console.log(res.data)
       setVideos(res.data || []);
     } catch (err) {
       console.error("Error fetching videos:", err);

@@ -18,8 +18,8 @@ interface VideoItem {
   id: string;
   title: string;
   progress: number; // 0 - 100
-  thumbnail?: string; // single thumbnail URL
-  url?: string; // signed video URL
+  thumbnail?: string; 
+  url?: string;
 }
 
 interface VideoTableProps {
