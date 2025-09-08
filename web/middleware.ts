@@ -6,7 +6,7 @@ const protectedRoutes = createRouteMatcher([
   "/shared-link/p/:token",
   '/videos/:id',
   '/library',
-  'links'
+  '/links'
   
 ]);
 
