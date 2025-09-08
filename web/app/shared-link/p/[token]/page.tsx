@@ -52,7 +52,7 @@ export default function PrivateShareLinkPage() {
           `/api/share-link/${params.token}`,
           {
             headers: {
-              Authorization: user.primaryEmailAddress.emailAddress, // ✅ backend expects email
+              Authorization: user.primaryEmailAddress.emailAddress, 
             },
           }
         );

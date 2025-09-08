@@ -5,7 +5,8 @@ const protectedRoutes = createRouteMatcher([
   "/dashboard",
   "/shared-link/p/:token",
   '/videos/:id',
-  '/library'
+  '/library',
+  'links'
   
 ]);
 

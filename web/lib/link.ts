@@ -40,18 +40,18 @@ interface RawVideo {
   storage_path: string;
   status: string;
   created_at: string;
-  thumbnails: RawThumbnail[]; // comes from join
+  thumbnails: RawThumbnail[]; 
 }
 
 interface RawShareLink {
   id: string;
   token: string;
   visibility: string;
-  emails: string[]; // jsonb in Supabase, coerce later
+  emails: string[]; 
   expiry: string | null;
   last_viewed_at: string | null;
   storage_path: string;
-  videos: RawVideo; // ✅ ensure this is a single object, not an array
+  videos: RawVideo; 
 }
 
 export async function getUserShareLinks(userId: string): Promise<ShareLink[]> {

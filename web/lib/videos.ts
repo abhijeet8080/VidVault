@@ -54,43 +54,7 @@ export async function fetchSignedUrl(bucket: string, path: string): Promise<stri
     return undefined;
   }
 }
-// Fetch all videos for a user with signed URLs
-export async function getUserVideos(userId: string): Promise<Video[]> {
-  const { data: videos, error } = await supabase
-    .from("videos")
-    .select(`
-      *,
-      thumbnails(storage_path)
-    `)
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching videos:", error);
-    return [];
-  }
-
-  if (!videos) return [];
-  // Map each video to include signed URLs
-  const videosWithUrls: Video[] = await Promise.all(
-  videos.map(async (video) => {
-    const videoUrl = await fetchSignedUrl("videos", video.storage_path);
-
-    const thumbnailsUrls = await Promise.all(
-      (video.thumbnails || []).map((t: Thumbnail) => fetchSignedUrl("thumbnails", t.storage_path))
-    );
-
-    return {
-      ...video,
-      videoUrl,
-      thumbnailsUrls,
-    };
-  })
-);
-
-
-  return videosWithUrls;
-}
 
 
 export async function getVideoById(videoId: string) {
